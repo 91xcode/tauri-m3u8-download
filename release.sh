@@ -379,26 +379,54 @@ echo ""
 echo -e "${BLUE}📦 版本:${NC} v${NEW_VERSION}"
 echo -e "${BLUE}🏷️  Tag:${NC}  v${NEW_VERSION}"
 echo ""
-echo -e "${YELLOW}🚀 GitHub Actions 正在构建...${NC}"
-echo -e "${YELLOW}⏱️  预计时间: 5-8 分钟${NC}"
-echo ""
-echo -e "${BLUE}🔗 查看进度:${NC}"
-echo -e "   https://github.com/YOUR_USERNAME/m3u8-downloader/actions"
-echo ""
-echo -e "${BLUE}📦 Release 页面:${NC}"
-echo -e "   https://github.com/YOUR_USERNAME/m3u8-downloader/releases/tag/v${NEW_VERSION}"
-echo ""
-echo -e "${GREEN}预期产物（6个文件）:${NC}"
-echo -e "  1️⃣  M3U8-Downloader-v${NEW_VERSION}-macOS-Apple-Silicon.dmg"
-echo -e "  2️⃣  M3U8-Downloader-v${NEW_VERSION}-macOS-Intel.dmg"
-echo -e "  3️⃣  M3U8-Downloader-v${NEW_VERSION}-Windows-x64.msi"
-echo -e "  4️⃣  M3U8-Downloader-v${NEW_VERSION}-Windows-x64-setup.exe"
-echo -e "  5️⃣  M3U8-Downloader-v${NEW_VERSION}-Linux-x64.deb"
-echo -e "  6️⃣  M3U8-Downloader-v${NEW_VERSION}-Linux-x64.AppImage"
+
+# 检测 GitHub 仓库信息
+GITHUB_REMOTE=$(git remote get-url origin 2>/dev/null)
+if [[ -n "$GITHUB_REMOTE" ]]; then
+    # 提取 GitHub 用户名和仓库名
+    if [[ "$GITHUB_REMOTE" =~ github.com[:/]([^/]+)/([^/.]+) ]]; then
+        GITHUB_USER="${BASH_REMATCH[1]}"
+        GITHUB_REPO="${BASH_REMATCH[2]}"
+
+        # 检查是否有 GitHub Actions 配置
+        if [ -f ".github/workflows/build-release.yml" ]; then
+            echo -e "${YELLOW}🚀 GitHub Actions 自动构建:${NC}"
+            echo -e "${YELLOW}⏱️  预计时间: 5-8 分钟${NC}"
+            echo ""
+            echo -e "${BLUE}🔗 查看进度:${NC}"
+            echo -e "   https://github.com/${GITHUB_USER}/${GITHUB_REPO}/actions"
+            echo ""
+            echo -e "${BLUE}📦 Release 页面:${NC}"
+            echo -e "   https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/tag/v${NEW_VERSION}"
+            echo ""
+            echo -e "${GREEN}预期产物（6个文件）:${NC}"
+            echo -e "  1️⃣  M3U8-Downloader-v${NEW_VERSION}-macOS-Apple-Silicon.dmg"
+            echo -e "  2️⃣  M3U8-Downloader-v${NEW_VERSION}-macOS-Intel.dmg"
+            echo -e "  3️⃣  M3U8-Downloader-v${NEW_VERSION}-Windows-x64.msi"
+            echo -e "  4️⃣  M3U8-Downloader-v${NEW_VERSION}-Windows-x64-setup.exe"
+            echo -e "  5️⃣  M3U8-Downloader-v${NEW_VERSION}-Linux-x64.deb"
+            echo -e "  6️⃣  M3U8-Downloader-v${NEW_VERSION}-Linux-x64.AppImage"
+        else
+            echo -e "${YELLOW}⚠️  未检测到 GitHub Actions 配置${NC}"
+            echo -e "${YELLOW}💡 如需自动构建，请配置 .github/workflows/build-release.yml${NC}"
+            echo ""
+            echo -e "${BLUE}📦 Release 页面:${NC}"
+            echo -e "   https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/tag/v${NEW_VERSION}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  无法解析 GitHub 仓库信息${NC}"
+        echo -e "${YELLOW}💡 请手动访问 GitHub 仓库查看${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  未检测到 GitHub 远程仓库${NC}"
+    echo -e "${YELLOW}💡 请先添加 GitHub 远程仓库：${NC}"
+    echo -e "   ${BLUE}git remote add origin https://github.com/YOUR_USERNAME/m3u8-downloader.git${NC}"
+fi
 echo ""
 echo -e "${YELLOW}💡 提示:${NC}"
-echo -e "   - 如需配置 GitHub Actions，请参考 .github/workflows/release.yml"
-echo -e "   - 请将上述 URL 中的 YOUR_USERNAME 替换为您的 GitHub 用户名"
+echo -e "   - Tag 已推送到 GitHub"
+echo -e "   - 如配置了 Actions，构建会自动开始"
+echo -e "   - 构建完成后会自动创建 Release"
 echo ""
 echo -e "${YELLOW}🍎 macOS 用户安装提示:${NC}"
 echo -e "   ${GREEN}方法1:${NC} 系统偏好设置 → 安全性与隐私 → 仍要打开"
