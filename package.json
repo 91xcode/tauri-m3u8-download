@@ -4,7 +4,10 @@
   "version": "3.0.0",
   "type": "module",
   "scripts": {
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "build": "tauri build",
+    "build:debug": "tauri build --features devtools",
+    "dev": "tauri dev"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"

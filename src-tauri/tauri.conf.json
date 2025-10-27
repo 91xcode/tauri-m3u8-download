@@ -8,19 +8,9 @@
   },
   "app": {
     "withGlobalTauri": true,
-    "windows": [
-      {
-        "title": "M3U8 视频下载器",
-        "width": 1200,
-        "height": 900,
-        "resizable": true,
-        "center": true,
-        "fullscreen": false,
-        "devtools": true
-      }
-    ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": ["default"]
     }
   },
   "bundle": {

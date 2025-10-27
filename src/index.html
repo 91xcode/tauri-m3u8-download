@@ -586,7 +586,11 @@ new Vue({
         // 🔥 如果有 Tauri HTTP，可以尝试降级
         if (this.hasTauriHttp()) {
           console.log('🔄 尝试使用 Tauri HTTP 客户端重试...')
-          this.tauriAjax(options)
+          // ✅ 正确处理 async 函数的错误
+          this.tauriAjax(options).catch(err => {
+            console.error('❌ Tauri HTTP 降级也失败:', err);
+            options.fail && options.fail(0);
+          });
         } else {
           options.fail && options.fail(0);
         }
