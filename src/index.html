@@ -663,6 +663,26 @@ new Vue({
         return
       }
 
+      // 🔥 关键：只在开始新下载时清理旧数据
+      // 如果上次下载已完成（完成数 > 0），则清空旧数据准备新下载
+      if (this.finishNum > 0) {
+        console.log('🔄 开始新下载，清理旧数据')
+        this.finishList = []
+        this.mediaFileList = []
+        this.tsUrlList = []
+        this.finishNum = 0
+        this.errorNum = 0
+        this.isDownloadFinished = false
+        this.streamWriter = null
+        this.streamDownloadIndex = 0
+        this.downloadIndex = 0
+        // 🔥 重置范围下载配置，避免使用旧的范围
+        this.rangeDownload.startSegment = ''
+        this.rangeDownload.endSegment = ''
+        this.rangeDownload.targetSegment = 1
+        this.rangeDownload.isShowRange = false
+      }
+
       // 在下载页面才触发，代码注入的页面不需要校验
       // 当前协议不一致，切换协议
       if (location.href.indexOf('blog.luckly-mjw.cn') > -1 && this.url.indexOf(location.protocol) === -1) {
@@ -843,13 +863,16 @@ new Vue({
           }
           if (this.streamDownloadIndex >= this.rangeDownload.targetSegment && !this.isDownloadFinished){
             this.isDownloadFinished = true // 🔥 设置完成标志，防止重复触发
-            this.streamWriter.close()
-            // 🔥 修复：流式下载完成后更新提示状态
-            setTimeout(() => {
-              this.tips = '流式下载完成！文件已保存'
-              this.downloading = false // 🔥 标记下载已完成
+            // 🔥 等待流式写入器关闭，只更新状态，不清理数据
+            this.streamWriter.close().then(() => {
+              this.tips = '流式下载完成！文件已保存，可以开始新的下载'
+              this.downloading = false
               console.log('✅ 流式下载完成！')
-            }, 500)
+            }).catch(err => {
+              console.error('❌ 关闭流式写入器失败:', err)
+              this.tips = '流式下载可能未完全保存，请检查文件'
+              this.downloading = false
+            })
           }
         } else if (this.finishNum === this.rangeDownload.targetSegment && !this.isDownloadFinished) {
           // 🔥 添加标志位检查，防止重复触发下载
@@ -987,12 +1010,13 @@ new Vue({
             // 写入文件
             await writeFile(filePath, uint8Array)
 
-            this.tips = '下载完成！文件已保存'
+            // 🔥 只更新状态，不清理数据（数据将在下次点击下载时清理）
+            this.tips = '下载完成！可以开始新的下载'
             this.downloading = false
             console.log('✅ 文件已成功保存到:', filePath)
           } else {
             console.log('⚠️ 用户取消了保存')
-            this.tips = '下载已取消'
+            this.tips = '下载已取消，可重新保存或开始新下载'
             this.downloading = false
           }
         } catch (error) {
